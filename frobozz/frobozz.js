@@ -152,6 +152,11 @@ var Game = {
     },
 
     attemptToUseItem: function(item, deathMessage) {
+        if (inventory.indexOf(item) < 0) {
+            Terminal.write("You don't have that item in your inventory.");
+            return;
+        } 
+        
         switch (item) {
             case 'turkey':
                 if (this._currentRoomName === "Dog") {
@@ -184,15 +189,14 @@ var Game = {
                     Terminal.write("You best the knight in single combat, it was a glorious but short fight.");
                     Terminal.write("With his dying breath, the knight leans in and says.....");
                     Terminal.write("Game designers Jared and Brendan are very impressed with your adventuresome spirit.  Hope to see you at the end of the hunt!");
+                    return;
                 }
                 break;
             default: 
-                if (inventory.indexOf(item) < 0) {
-                    Terminal.write("You don't have that item in your inventory.")
-                } else {
-                    Terminal.write("You can't use that here.");
-                }
+                break;
         }
+
+        Terminal.write("You can't use that here.");
     }
 };
 
