@@ -1,11 +1,14 @@
 {
   "name": "tc-text-adventure",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A Tableau Conference text adventure.",
-  "main": "index.js",
+  "main": "frobozz.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Jared Dominguez",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^3.5.3"
+  }
 }
