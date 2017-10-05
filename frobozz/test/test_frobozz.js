@@ -4,7 +4,7 @@
 
 // Import dependencies
 var assert = require('assert');
-var TC = require('../index.js');
+var TC = require('../frobozz.js');
 
 describe('Text Adventure Unit Tests', function() {
     beforeEach(function() {
@@ -83,27 +83,17 @@ describe('Text Adventure Unit Tests', function() {
     });
 
     it('game mapTokensToEvent should return matching event type if it exists', function() {
-        assert.deepEqual(TC.game.mapTokensToEvents(['fight']), ['attack']);
+        assert.deepEqual(TC.game.mapTokensToEvents(['attack']), ['attack']);
     });
 
     it('game mapTokensToEvent should return empty string if event type does not exist', function() {
         assert.deepEqual(TC.game.mapTokensToEvents(['blah']), []);
     });
 
-    it('game mapTokensToEvent should return multiple if multiple matches', function() {
-        assert.deepEqual(TC.game.mapTokensToEvents(['go', 'enter']), ['enter', 'enter']);
-    });
-
     it('game getRoomEvent if one mapped event and one room event, and both match, return room event', function() {
         var evt = TC.game.getRoomEvent(['take'], [ { type: 'take', param: 'knife' } ], ['take']);
         assert.equal('take', evt.type);
         assert.equal('knife', evt.param);
-    });
-
-    it('game getRoomEvent if one mapped event and one matching room event, return room event', function() {
-        var evt = TC.game.getRoomEvent(['take'], [ { type: 'take', param: 'sword' }, { type: 'enter' } ]);
-        assert.equal('take', evt.type);
-        assert.equal('sword', evt.param);
     });
 
     it('game getRoomEvent if one mapped event and multiple room events, check tokens against keywords for match, return action', function() {

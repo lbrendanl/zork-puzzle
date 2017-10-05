@@ -103,9 +103,7 @@ var TC = {
             }
 
             function compareRoomsToTokens(rooms, tokens) {
-                if (rooms.length === 1) {
-                    return rooms[0];
-                } else if (rooms.length > 1) {
+                if (rooms.length >= 1) {
                     for (var i = 0; i < rooms.length; i++) {
                         if (areArraysOverlapping(tokens, rooms[i].keywords)) {
                             return rooms[i];
@@ -115,12 +113,29 @@ var TC = {
                 return TC.events.invalid;
             }
 
+            function roomContainsEvent (eventType) {
+                for (var i = 0; i < roomEvents.length; i++) {
+                    if (roomEvents[i].type === eventType) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             // Global options
             if (mappedEvents.indexOf('help') !== -1) {
                 return TC.events.help;
             } else if (mappedEvents.indexOf('inventory') !== -1) {
                 return TC.events.inventory;
+            } else if (mappedEvents.indexOf('look') !== -1) {
+                return TC.events.look;
+            } else if (!roomContainsEvent('take') && mappedEvents.indexOf('take') !== -1) {
+                // When the room doesn't have a take event, stop processing.
+                // Let the take event default to a nothing to take message because there is no room param passed.
+                return TC.events.take;
             }
+
+
             // Logic to decide on room events
             if (mappedEvents.length === 1) {
                 if (roomEvents.length === 1 && mappedEvents[0] === roomEvents[0].type) {
@@ -133,6 +148,9 @@ var TC = {
                     }
                 });
 
+                if (filteredRoomMatches.length === 1) {
+                    return filteredRoomMatches[0];
+                }
                 return compareRoomsToTokens(filteredRoomMatches, tokens);
 
             } else if (mappedEvents.length < 1) {
@@ -145,6 +163,11 @@ var TC = {
 
         performAction: function(roomEvent) {
             TC.events[roomEvent.type].action(roomEvent.param);
+        },
+
+        switchToAlternateDescAndEvents: function(room) {
+            room.description = room.alternateDescription;
+            room.roomEvents = room.alternateRoomEvents;
         }
     },
 
@@ -169,14 +192,19 @@ var TC = {
         'look': {
             type: 'look',
             action: function(param) {
+                TC.terminal.write(TC.game.currentRoom.description);
+            }
+        },
+        'examine': {
+            type: 'examine',
+            action: function(param) {
                 if (TC.player.possibleInventory.indexOf(param) !== -1) {
                     TC.events.take.action(param);
                     return;
                 }
-
-                TC.terminal.write(TC.game.currentRoom.description);
             }
         },
+
         'enter': {
             type: 'enter',
             action: function(param) {
@@ -190,7 +218,11 @@ var TC = {
                 window.setTimeout(function() {
                     TC.terminal.clearHistory();
                     TC.game.setCurrentRoom(param);
-                    TC.terminal.showInput();
+
+                    var isLastRoom = (typeof TC.game.currentRoom.roomEvents === 'undefined');
+                    if (!isLastRoom) {
+                        TC.terminal.showInput();
+                    }
                 }, 1500);
             }
         },
@@ -205,26 +237,17 @@ var TC = {
             type: 'take',
             action: function(param) {
                 if (typeof param === 'undefined' ||
-                    param === '' ||
-                    TC.player.possibleInventory.indexOf(param) === -1) {
-                    return;
-                }
+                        param === '' ||
+                        TC.player.possibleInventory.indexOf(param) === -1) {
 
-                TC.player.addToInventory(param);
-                TC.terminal.write(TC.gameconfig.messages.itemAddedToInventory);
-                TC.terminal.write('-- ' + param);
-            }
-        },
-        'drop': {
-            type: 'drop',
-            action: function(param) {
-                if (typeof param === 'undefined' || param === '') {
-                    TC.terminal.write(TC.gameconfig.messages.inputNotUnderstood);
                     TC.terminal.write(TC.gameconfig.messages.nothingToTake);
                     return;
                 }
 
-                TC.player.dropFromInventory(param);
+                TC.player.addToInventory(param);
+                TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
+                TC.terminal.write(TC.gameconfig.messages.itemAddedToInventory);
+                TC.terminal.write('-- ' + param);
             }
         },
         'attack': {
@@ -234,6 +257,7 @@ var TC = {
                     TC.events.death.action(param);
                     return;
                 }
+                TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
                 TC.events.enter.action(param);
             }
         },
@@ -260,6 +284,8 @@ var TC = {
             action: function(param) {
                 if (TC.player.inventory.indexOf('key') !== -1) {
                     TC.terminal.write(TC.gameconfig.messages.unlocked);
+                    TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
+                    TC.player.removeFromInventoryOnUse('key');
                     TC.events.enter.action(param);
                     return;
                 }
@@ -276,7 +302,9 @@ var TC = {
             type: 'feed',
             action: function(param) {
                 if (TC.player.inventory.indexOf('turkey') !== -1) {
+                    TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
                     TC.events.enter.action(param);
+                    TC.player.removeFromInventoryOnUse('turkey');
                     return;
                 }
 
@@ -314,6 +342,7 @@ var TC = {
         getInventory: function() {
             return this.inventory;
         },
+
         addToInventory: function(item) {
             this.inventory.push(item);
             this.possibleInventory = this.possibleInventory.filter(function(inv) {
@@ -321,8 +350,7 @@ var TC = {
             });
         },
 
-        dropFromInventory: function(item) {
-            this.possibleInventory.push(item);
+        removeFromInventoryOnUse: function(item) {
             this.inventory = this.inventory.filter(function(inv) {
                 return item !== inv;
             });
@@ -352,13 +380,20 @@ var TC = {
         messages: {
             emptyInventory: 'There is nothing in your inventory.',
             gameOver: 'Game Over',
-            help: 'If you get stuck, try running one of these commands: <br> ENTER, EXIT, LEFT, RIGHT, UP, DOWN, TAKE, ATTACK, LOOK, INVENTORY',
+            help: 'Here are some things that you can do:<br><br>' +
+					'-- ENTER. Go into a room. You can also type the name of the room or the direction. For example, try UP or LEFT.<br><br>' +
+					'-- EXIT. Leave the room.<br><br>' +
+					'-- TAKE. Try to add an item to your inventory. You can also type the name of the item.<br><br>' +
+					'-- FIGHT. Fight the enemies blocking your path.<br><br>' +
+					'-- LOOK. Look around the room again.<br><br>' +
+					'-- INVENTORY. List the items that you have added to your inventory.To use an item, type the name of the item.<br><br>' +
+					'-- HINT. Stuck? Get a hint.',
             inputNotUnderstood: 'Come again?',
             itemAddedToInventory: 'Item added to inventory.',
-            locked: 'It holds fast.',
+            nothingToTake: 'There is nothing to take.',
+            locked: 'You try to open it, but it holds fast.',
             noAction: 'Nothing to do.',
             noFood: 'You do not have any food to feed the dog!',
-            nothingToTake: 'There is nothing to take.',
             unlocked: 'Success! It opened.'
         },
         possibleInventory: ['turkey', 'key', 'sword'],
@@ -374,6 +409,7 @@ var TC = {
             },
             'Outside': {
                 description: 'You see an old, decrepit house before you. <br>The treasure you seek is somewhere inside. <br>But plenty of traps and obstacles stand in your way. <br>There is something familiar about this place.... <br><br>You see a large knight standing blocking the entrance to the house.',
+                alternateDescription: 'The door to the house is ajar. The knight mutters something in his stupor, but continues to lie still.',
                 roomEvents: [{
                     type: 'attack',
                     msg: 'Luck shines upon you. The knight trips mid-swing, and knocks himself out.',
@@ -384,6 +420,12 @@ var TC = {
                     msg: 'You try to run, but the knight is too fast. He stabs you in the back.',
                     keywords: ['flee', 'leave'],
                     param: 'death'
+                }],
+                alternateRoomEvents: [{
+                    type: 'enter',
+                    msg: 'You enter the house.',
+                    keywords: ['house', 'door'],
+                    param: 'Entry'
                 }]
             },
             // Left and right aren't an option in the flow chart,
@@ -400,22 +442,7 @@ var TC = {
                         msg: 'You go down the stairs.',
                         keywords: ['down'],
                         param: 'Basement'
-                    },
-                    /*
-                    {
-                        type: 'enter',
-                        msg: 'TODO You go into the door on the left.',
-                        keywords: ['door', 'left'],
-                        param: 'TODO'
-                    },
-                    {
-                        type: 'enter',
-                        msg: 'TODO You go into the door on the right.',
-                        keywords: ['door', 'right'],
-                        param: 'TODO'
-                    },
-                    */
-                    {
+                    }, {
                         type: 'exit',
                         msg: 'You exit the house.',
                         keywords: ['back', 'outside'],
@@ -444,6 +471,7 @@ var TC = {
             },
             'Kitchen': {
                 description: 'A turkey leg is sitting on the counter.',
+                alternateDescription: 'The kitchen is empty.',
                 roomEvents: [{
                     type: 'take',
                     keywords: ['turkey', 'leg'],
@@ -453,12 +481,19 @@ var TC = {
                     msg: 'You return to the basement hallway.',
                     keywords: ['basement', 'hallway'],
                     param: 'Basement'
+                }],
+                alternateRoomEvents: [{
+                    type: 'exit',
+                    msg: 'You return to the basement hallway.',
+                    keywords: ['basement', 'hallway'],
+                    param: 'Basement'
                 }]
             },
             'Closet': {
                 description: 'The storage closet is dimly lit and smells faintly of mothballs. Above you, there is a shelf.',
+                alternateDescription: 'The storage closet is dimly lit and smells faintly of mothballs. Above you, there is a shelf.',
                 roomEvents: [{
-                    type: 'look',
+                    type: 'examine',
                     msg: 'You reach through cobwebs to the far back of the shelf. There you find a key.',
                     keywords: ['reach', 'shelf'],
                     param: 'key'
@@ -467,10 +502,22 @@ var TC = {
                     msg: 'You return to the basement hallway.',
                     keywords: ['leave', 'back', 'hall', 'hallway'],
                     param: 'Basement'
-                }]
+                }],
+                alternateRoomEvents: [{
+                    type: 'examine',
+                    msg: 'You reach through cobwebs to the far back of the shelf. A spider crawls over your hand, but there is nothing else there.',
+                    keywords: ['reach', 'shelf'],
+                    param: ''
+                }, {
+                    type: 'exit',
+                    msg: 'You return to the basement hallway.',
+                    keywords: ['leave', 'back', 'hall', 'hallway'],
+                    param: 'Basement'
+                }],
             },
             'StairTop': {
                 description: 'At the top of the stairs, you encounter a locked door.',
+                alternateDescription: 'You are at the top of the stairs. A key is stuck in the open door before you.',
                 roomEvents: [{
                     type: 'exit',
                     msg: 'You go back down the stairs.',
@@ -491,7 +538,18 @@ var TC = {
                     msg: '',
                     keywords: ['unlock'],
                     param: 'Hallway'
-                }]
+                }],
+                alternateRoomEvents: [{
+                    type: 'exit',
+                    msg: 'You go back down the stairs.',
+                    keywords: ['leave', 'back', 'stairs', 'down'],
+                    param: 'Entry'
+                }, {
+                    type: 'open',
+                    msg: '',
+                    keywords: [],
+                    param: ''
+                }],
             },
             'Hallway': {
                 description: 'You enter a room on the top floor of the house and see a door on the left and one the right.',
@@ -513,7 +571,8 @@ var TC = {
                 }]
             },
             'Right': {
-                description: 'Before you is a small armory. A sword leans in the corner next to a plate of armor, and on the wall hangs a shield.',
+                description: 'Before you is a small armory. A sword leans in the corner, and on the wall hangs a shield.',
+                alternateDescription: 'Before you is a small armory. There is a shield on the wall.',
                 roomEvents: [{
                         type: 'exit',
                         msg: 'You return to the hallway.',
@@ -530,15 +589,32 @@ var TC = {
                         keywords: ['shield'],
                         param: ''
                     }
-
+                ],
+                alternateRoomEvents: [{
+                        type: 'exit',
+                        msg: 'You return to the hallway.',
+                        keywords: ['leave', 'back', 'hallway', 'hall'],
+                        param: 'Hallway'
+                    }, {
+                        type: 'take',
+                        msg: 'The shield is fastened to the wall and will not come loose.',
+                        keywords: ['shield'],
+                        param: ''
+                    }
                 ]
             },
             'Left': {
                 description: 'You enter a round room.  There are only three things in this room.  The door you came through, a door on the other side of the room, and a two headed dog in the middle.',
+                alternateDescription: 'A two-headed dog sleeps contentedly on the floor with a turkey bone under its paw. There is a door on the other side of the room. The exit is behind you.',
                 roomEvents: [{
-                        type: 'exit',
+                        type: 'run',
                         msg: 'You flee in terror.',
-                        keywords: ['leave', 'back', 'run', 'flee'],
+                        keywords: ['flee'],
+                        param: 'Hallway'
+                    }, {
+                        type: 'exit',
+                        msg: 'You slowly back away.',
+                        keywords: ['back', 'leave'],
                         param: 'Hallway'
                     }, {
                         type: 'attack',
@@ -551,25 +627,35 @@ var TC = {
                         keywords: ['turkey'],
                         param: 'Chestroom'
                     }
-
-                ]
+                ],
+                alternateRoomEvents: [{
+                        type: 'exit',
+                        msg: 'You exit to the hallway.',
+                        keywords: ['back', 'leave'],
+                        param: 'Hallway'
+                    }, {
+                        type: 'enter',
+                        msg: 'You pass through the door.',
+                        keywords: ['door'],
+                        param: 'Chestroom'
+                    }]
             },
             'Chestroom': {
                 description: 'You enter a giant room with tall ceilings.  A ray of light shines down from the ceiling in the center of the room. The light shines down upon a jewel encrusted chest. The chest appears locked, but there is an inscription in an ancient language around the outside of the chest.',
                 roomEvents: [{
                     type: 'read',
-                    msg: 'You read the inscription.',
-                    keywords: ['inscription', 'examine', 'look'],
+                    msg: 'You read the inscription, slowly sounding out the strange and lilting syllables. The dust swirls around you and the chest begines to creak.',
+                    keywords: ['inscription', 'examine'],
                     param: 'End'
                 }, {
                     type: 'open',
                     msg: '',
-                    keywords: ['chest'],
+                    keywords: ['unlock', 'chest'],
                     param: ''
                 }, {
                     type: 'exit',
                     msg: 'You return to face the dog.',
-                    keywords: ['dog'],
+                    keywords: ['back', 'leave'],
                     param: 'Left'
                 }]
             },
