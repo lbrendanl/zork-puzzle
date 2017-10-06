@@ -1,11 +1,11 @@
 {
   "name": "tc-text-adventure",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A Tableau Conference text adventure.",
   "main": "frobozz.js",
   "scripts": {
     "test": "mocha",
-    "minify": "uglifyjs frobozz.js --comments --compress -o frobozz.min.js"
+    "minify": "uglifyjs frobozz.js --comments --compress -o min.js"
   },
   "author": "Jared Dominguez",
   "license": "MIT",
