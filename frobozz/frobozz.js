@@ -257,6 +257,18 @@ var TC = {
                     TC.events.death.action(param);
                     return;
                 }
+                TC.events.enter.action(param);
+            }
+        },
+        'bribe': {
+            type: 'bribe',
+            action: function(param) {
+                TC.events.death.action(param);
+            }
+        },
+        'talk': {
+            type: 'talk',
+            action: function(param) {
                 TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
                 TC.events.enter.action(param);
             }
@@ -264,6 +276,7 @@ var TC = {
         'death': {
             type: 'death',
             action: function(param) {
+                TC.terminal.write();
                 TC.terminal.write(TC.gameconfig.messages.gameOver);
                 TC.terminal.hideInput();
             }
@@ -379,7 +392,7 @@ var TC = {
         startRoom: 'Intro',
         messages: {
             emptyInventory: 'There is nothing in your inventory.',
-            gameOver: 'Game Over',
+            gameOver: '--- GAME OVER ---<br><br>Refresh this page to try again.',
             help: 'Here are some things that you can do:<br><br>' +
 					'-- ENTER. Go into a room. You can also type the name of the room or the direction. For example, try UP or LEFT.<br><br>' +
 					'-- EXIT. Leave the room.<br><br>' +
@@ -399,7 +412,7 @@ var TC = {
         possibleInventory: ['turkey', 'key', 'sword'],
         rooms: {
             'Intro': {
-                description: 'Welcome to the TC text adventure! <br><br> Type HELP for tips on how to play. When you are ready to continue, type ENTER.',
+                description: 'Welcome!  The next puzzle is a short interactive text adventure game. It may have a hint of familiarity. <br><br>For tips on how to play, type HELP. <br>When you are ready to continue, type ENTER.',
                 roomEvents: [{
                     type: 'enter',
                     msg: 'Stick with it to the end for another puzzlehunt clue!',
@@ -408,19 +421,30 @@ var TC = {
                 }]
             },
             'Outside': {
-                description: 'You see an old, decrepit house before you. <br>The treasure you seek is somewhere inside. <br>But plenty of traps and obstacles stand in your way. <br>There is something familiar about this place.... <br><br>You see a large knight standing blocking the entrance to the house.',
-                alternateDescription: 'The door to the house is ajar. The knight mutters something in his stupor, but continues to lie still.',
+                description: 'You see an old, decrepit house before you. <br>The treasure you seek is somewhere inside. <br>But beware, many traps and enemies await. <br>Perhaps if you follow your map, you might make it through.<br><br>You see a large knight standing blocking the entrance to the house.',
+                alternateDescription: 'The door to the house is ajar. The knight has disappeared.',
                 roomEvents: [{
                     type: 'attack',
-                    msg: 'Luck shines upon you. The knight trips mid-swing, and knocks himself out.',
+                    msg: 'The knight overpowers you and beats you in single combat.',
                     keywords: ['fight'],
-                    param: 'Entry'
+                    param: 'death'
                 }, {
                     type: 'run',
                     msg: 'You try to run, but the knight is too fast. He stabs you in the back.',
                     keywords: ['flee', 'leave'],
                     param: 'death'
-                }],
+                }, {
+                    type: 'bribe',
+                    msg: 'The knight is too honorable for that, he charges at you and you are forced to run.',
+                    keywords: [''],
+                    param: 'death'
+                }, {
+                    type: 'talk',
+                    msg: 'You make an empassioned speech about your destiny, and the knight is moved by your resolve. He moves aside to let you pass.',
+                    keywords: ['convince', 'speech'],
+                    param: 'Entry'
+                }
+                ],
                 alternateRoomEvents: [{
                     type: 'enter',
                     msg: 'You enter the house.',
