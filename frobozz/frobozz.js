@@ -617,9 +617,14 @@ var TC = {
                     keywords: ['leave', 'back', 'stairs', 'down'],
                     param: 'Entry'
                 }, {
+                    type: 'enter',
+                    msg: 'You enter through the open door.',
+                    keywords: ['go', 'door'],
+                    param: 'Hallway'
+                }, {
                     type: 'nullEvent',
                     msg: 'The door is already open.',
-                    keywords: ['open', 'door'],
+                    keywords: ['open'],
                     param: ''
                 }],
             },
@@ -627,7 +632,7 @@ var TC = {
                 description: 'You enter a room on the top floor of the house and see a door on the left and one the right.',
                 roomEvents: [{
                     type: 'exit',
-                    msg: 'You go back down the stairs.',
+                    msg: 'You go back to the top of the stairs.',
                     keywords: ['leave', 'back', 'down', 'stairs'],
                     param: 'StairTop'
                 }, {
