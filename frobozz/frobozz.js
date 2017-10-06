@@ -114,6 +114,13 @@ var TC = {
                         }
                     }
                 }
+
+                // If there are no matches above, see if this is an
+                // attempt to use an item (in a room where it doesn't apply.
+                // If so, print a useful message.
+                if (isBadAttemptToUseItem()) {
+                    return TC.events.cannotUseItem;
+                }
                 return TC.events.invalid;
             }
 
@@ -154,10 +161,7 @@ var TC = {
                 // When the room doesn't have a take event, stop processing.
                 // Let the take event default to a nothing to take message because there is no room param passed.
                 return TC.events.take;
-            } else if (isBadAttemptToUseItem()) {
-                return TC.events.cannotUseItem;
             }
-
             // Logic to decide on room events
             if (mappedEvents.length === 1) {
                 if (roomEvents.length === 1 && mappedEvents[0] === roomEvents[0].type) {
@@ -692,7 +696,7 @@ var TC = {
                 }, {
                     type: 'attack',
                     msg: 'Did I mention it had two heads? You manage to injure the left head as the right head lunges at you...',
-                    keywords: ['sword'],
+                    keywords: ['fight', 'sword'],
                     param: 'death'
                 }, {
                     type: 'feed',
