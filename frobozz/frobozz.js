@@ -444,7 +444,7 @@ var TC = {
                 }]
             },
             'Entry': {
-                description: 'In the entry room of the house, you see a giant staircase leading both up and down.',
+                description: 'In the entry room of the house, you see a giant staircase leading both up and down. Behind you, a door leads outside.',
                 roomEvents: [{
                     type: 'enter',
                     choice: 'Go up the stairs.',
@@ -463,7 +463,7 @@ var TC = {
                 }]
             },
             'Basement': {
-                description: 'You are now in the basement hallway. To your left you can see the kitchen, to your right a closet.',
+                description: 'You are now in the basement hallway. To your left you can see the kitchen, to your right a closet. The staircase you used is behind you.',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back upstairs.',
@@ -482,8 +482,8 @@ var TC = {
                 }]
             },
             'Kitchen': {
-                description: 'A turkey leg is sitting on the counter. Perhaps it would make a good snack.',
-                alternateDescription: 'The kitchen is empty.',
+                description: 'A turkey leg is sitting on the counter. Perhaps it would make a good snack. The basement hallway lies behind you.',
+                alternateDescription: 'The kitchen is empty. The basement hallway lies behind you.',
                 roomEvents: [{
                     type: 'take',
                     choice: 'Take a turkey leg.',
@@ -502,8 +502,8 @@ var TC = {
                 }]
             },
             'Closet': {
-                description: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf.',
-                alternateDescription: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf.',
+                description: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf. The basement hallway lies behind you.',
+                alternateDescription: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf. The basement hallway lies behind you.',
                 roomEvents: [{
                     type: 'examine',
                     choice: 'Search the coat.',
@@ -532,8 +532,8 @@ var TC = {
                 alternateDescription: 'You are at the top of the stairs. A key is stuck in the open door before you.',
                 roomEvents: [{
                     type: 'exit',
-                    choice: 'Go back down the stairs.',
-                    msg: 'You go back down the stairs.',
+                    choice: 'Go down the stairs.',
+                    msg: 'You go down the stairs.',
                     param: 'Entry'
                 }, {
                     type: 'nullEvent',
@@ -559,7 +559,7 @@ var TC = {
                 }]
             },
             'Hallway': {
-                description: 'You enter a room on the top floor of the house. There are three doors in a row.',
+                description: 'You enter a room on the top floor of the house. There are three doors in a row. Through the door behind you, a staircase leads down to the main floor.',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the stairs.',
@@ -583,8 +583,8 @@ var TC = {
                 }]
             },
             'Right': {
-                description: 'Before you is a small armory. A sword leans in the corner, and on the wall hangs a shield.',
-                alternateDescription: 'Before you is a small armory. There is a shield on the wall.',
+                description: 'Before you is a small armory. A sword leans in the corner, and on the wall hangs a shield. Behind you is the hallway.',
+                alternateDescription: 'Before you is a small armory. There is a shield on the wall. Behind you is the hallway.',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the hallway.',
