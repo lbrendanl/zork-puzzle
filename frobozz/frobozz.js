@@ -625,7 +625,7 @@ var TC = {
                     type: 'exit',
                     msg: 'You go back down the stairs.',
                     keywords: ['leave', 'back', 'down', 'stairs'],
-                    param: 'Entry'
+                    param: 'StairTop'
                 }, {
                     type: 'enter',
                     msg: 'You open the door on the left.',
