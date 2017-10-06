@@ -4,11 +4,13 @@
   "description": "A Tableau Conference text adventure.",
   "main": "frobozz.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "minify": "uglifyjs frobozz.js -o frobozz.min.js"
   },
   "author": "Jared Dominguez",
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^3.5.3"
+    "mocha": "^3.5.3",
+    "uglify-js": "^3.1.3"
   }
 }
