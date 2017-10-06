@@ -126,6 +126,21 @@ var TC = {
                 return false;
             }
 
+            function isBadAttemptToUseItem() {
+                // Tried to use an item in your inventory that doesn't apply to the room
+                for (var i = 0; i < TC.player.inventory.length; i++) {
+                    var item = TC.player.inventory[i];
+
+                    for (var t = 0; t < tokens.length; t++) {
+                        if (TC.player.inventory.indexOf(tokens[i]) !== -1 && !roomContainsEvent(item)) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
             // Global options
             if (mappedEvents.indexOf('help') !== -1) {
                 return TC.events.help;
@@ -139,8 +154,9 @@ var TC = {
                 // When the room doesn't have a take event, stop processing.
                 // Let the take event default to a nothing to take message because there is no room param passed.
                 return TC.events.take;
+            } else if (isBadAttemptToUseItem()) {
+                return TC.events.cannotUseItem;
             }
-
 
             // Logic to decide on room events
             if (mappedEvents.length === 1) {
@@ -264,6 +280,12 @@ var TC = {
                 TC.game.switchToAlternateDescAndEvents(TC.game.currentRoom);
                 TC.terminal.write(TC.gameconfig.messages.itemAddedToInventory);
                 TC.terminal.write('-- ' + param);
+            }
+        },
+        'cannotUseItem': {
+            type: 'cannotUseItem',
+            action: function(param) {
+                TC.terminal.write(TC.gameconfig.messages.cannotUseItemHere);
             }
         },
         'attack': {
@@ -403,6 +425,7 @@ var TC = {
     gameconfig: {
         startRoom: 'Intro',
         messages: {
+            cannotUseItemHere: 'Cannot use that item here.',
             emptyInventory: 'There is nothing in your inventory.',
             gameOver: '--- GAME OVER ---<br><br>Refresh this page to try again.',
             defaultHint: 'Have you visited all the rooms yet?',
