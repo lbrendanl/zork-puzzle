@@ -435,7 +435,7 @@ var TC = {
                 }]
             },
             'Outside': {
-                description: 'A lonely house looms near, and there<br> the path now ends. If you should dare<br> to go within, beware! Foes, traps, <br>and treachery await. Your map<br> and choices past do not forget,<br> for they will guide you to your fate.<br> Now go! The treasure lies in wait.<br><br><br>A knight stands solid as a stone in the entrance of the door. He doesn\'t seem like the type that would be easily intimated or bribed.',
+                description: 'A lonely house looms near, and there<br> the path now ends. If you should dare<br> to go within, beware! Foes, traps, <br>and treachery are near. Your map<br> and choices past do not forget,<br> for they will guide you to your fate.<br> Now go! The treasure lies in wait.<br><br><br>A knight stands solid as a stone in the entrance of the door. He doesn\'t seem like the type that would be easily intimated or bribed.',
                 alternateDescription: 'The door to the house is ajar. The knight has disappeared.',
                 hint: 'Can you convince him to let you pass?',
                 roomEvents: [{
