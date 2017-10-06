@@ -2,7 +2,7 @@ var TC = {
 
     init: function() {
         TC.terminal.init('terminal-history', 'terminal-input');
-        TC.gameconfig = TC.game.assignIds(TC.gameconfig);
+        TC.gameconfig = TC.game.assignIds(TC.gameconfig); // Used later for numbered input choices
         TC.game.init(TC.gameconfig);
         TC.player.init();
         TC.keyboard.init();
@@ -159,12 +159,6 @@ var TC = {
     },
 
     events: {
-        'help': {
-            type: 'help',
-            action: function(param) {
-                TC.terminal.write(TC.gameconfig.messages.help);
-            }
-        },
         'inventory': {
             type: 'inventory',
             action: function(param) {
@@ -183,13 +177,6 @@ var TC = {
                 var room = TC.game.currentRoom;
                 TC.terminal.write(room.description);
                 TC.game.displayChoices(room);
-            }
-        },
-        'hint': {
-            type: 'hint',
-            action: function(param) {
-                var hintText = TC.game.currentRoom.hint || TC.gameconfig.messages.defaultHint;
-                TC.terminal.write(hintText);
             }
         },
         'examine': {
@@ -409,15 +396,6 @@ var TC = {
             cannotUseItemHere: 'Cannot use that item here.',
             emptyInventory: 'There is nothing in your inventory.',
             gameOver: '--- GAME OVER ---<br><br>Refresh this page to try again.',
-            defaultHint: 'Have you visited all the rooms yet?',
-            help: 'Here are some things that you can do:<br><br>' +
-                '-- ENTER. Go into a room. You can also type the name of the room or the direction. For example, try UP or LEFT.<br><br>' +
-                '-- EXIT. Leave the room.<br><br>' +
-                '-- TAKE. Try to add an item to your inventory. You can also type the name of the item.<br><br>' +
-                '-- FIGHT. Fight the enemies blocking your path.<br><br>' +
-                '-- LOOK. Look around the room again.<br><br>' +
-                '-- INVENTORY. List the items that you have added to your inventory.To use an item, type the name of the item.<br><br>' +
-                '-- HINT. Stuck? Get a hint.',
             inputNotUnderstood: 'Come again?',
             inventoryContents: 'You have the following items in your inventory:',
             itemAddedToInventory: 'Item added to inventory.',
@@ -436,62 +414,51 @@ var TC = {
                     type: 'enter',
                     choice: 'Enter the game. (Type 1 to select this command.)',
                     msg: 'Stick with it to the end for another puzzlehunt clue!',
-                    keywords: ['start'],
                     param: 'Outside'
                 }]
             },
             'Outside': {
                 description: 'A lonely house looms near, and there<br> the path now ends. If you should dare<br> to go within, beware! Foes, traps, <br>and treachery are near. Your map<br> and choices past do not forget,<br> for they will guide you to your fate.<br> Now go! The treasure lies in wait.<br><br><br>A knight stands solid as a stone in the entrance of the door.',
                 alternateDescription: 'The door to the house is ajar. The knight has disappeared.',
-                hint: 'Can you convince him to let you pass?',
                 roomEvents: [{
                     type: 'attack',
                     choice: 'Attack the knight.',
                     msg: 'You charge! However, the knight isn\'t impressed. He fells you with a powerful blow.',
-                    keywords: ['fight', 'intimidate'],
                     param: 'death'
                 }, {
                     type: 'bribe',
                     choice: 'Bribe the knight.',
                     msg: 'You have impinged on the knight\'s honor. He flies into a rage and cuts you down.',
-                    keywords: ['money'],
                     param: 'death'
                 }, {
                     type: 'talk',
                     choice: 'Make an empassioned speech about your destiny.',
                     msg: 'The knight is moved by your resolve. He lets you pass.',
-                    keywords: ['convince', 'speech'],
                     param: 'Entry'
                 }],
                 alternateRoomEvents: [{
                     type: 'enter',
                     choice: 'Enter the house.',
                     msg: 'You enter the house.',
-                    keywords: ['house', 'door'],
                     param: 'Entry'
                 }]
             },
-            // Left and right aren't an option in the flow chart,
-            // This is an early indicator that the game is slightly different.
             'Entry': {
                 description: 'In the entry room of the house, you see a giant staircase leading both up and down.',
                 roomEvents: [{
                     type: 'enter',
                     choice: 'Go up the stairs.',
                     msg: 'You go up the stairs.',
-                    keywords: ['up'],
                     param: 'StairTop'
                 }, {
                     type: 'enter',
                     choice: 'Go down the stairs.',
                     msg: 'You go down the stairs.',
-                    keywords: ['down'],
                     param: 'Basement'
                 }, {
                     type: 'exit',
                     choice: 'Go back outside.',
                     msg: 'You exit the house.',
-                    keywords: ['back', 'outside'],
                     param: 'Outside'
                 }]
             },
@@ -501,234 +468,222 @@ var TC = {
                     type: 'exit',
                     choice: 'Go back upstairs.',
                     msg: 'You go back up the stairs.',
-                    keywords: ['back', 'up', 'stairs'],
                     param: 'Entry'
                 }, {
                     type: 'enter',
                     choice: 'Enter the kitchen.',
                     msg: 'You go into the kitchen.',
-                    keywords: ['left', 'kitchen'],
                     param: 'Kitchen'
                 }, {
                     type: 'enter',
                     choice: 'Enter the closet.',
                     msg: 'You enter the closet.',
-                    keywords: ['right', 'closet'],
                     param: 'Closet'
                 }]
             },
             'Kitchen': {
                 description: 'A turkey leg is sitting on the counter. Perhaps it would make a good snack.',
                 alternateDescription: 'The kitchen is empty.',
-                hint: 'It doesn\'t seem like anyone would mind if you take it...',
                 roomEvents: [{
                     type: 'take',
                     choice: 'Take a turkey leg.',
-                    keywords: ['turkey', 'leg', 'snack'],
                     param: 'turkey'
                 }, {
                     type: 'exit',
                     choice: 'Go back to the hallway.',
                     msg: 'You return to the basement hallway.',
-                    keywords: ['back', 'basement', 'hallway'],
                     param: 'Basement'
                 }],
                 alternateRoomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the hallway.',
                     msg: 'You return to the basement hallway.',
-                    keywords: ['back', 'basement', 'hallway'],
                     param: 'Basement'
                 }]
             },
             'Closet': {
                 description: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf.',
                 alternateDescription: 'The storage closet is dimly lit and smells faintly of mothballs. A stained coat hangs from a peg on the shelf.',
-                hint: 'Maybe you should examine the coat...',
                 roomEvents: [{
                     type: 'examine',
                     choice: 'Search the coat.',
                     msg: 'You find a key in the pockets.',
-                    keywords: ['coat'],
                     param: 'key'
                 }, {
                     type: 'exit',
                     choice: 'Return to the basement hallway.',
                     msg: 'You return to the basement hallway.',
-                    keywords: ['leave', 'back', 'hall', 'hallway'],
                     param: 'Basement'
                 }],
                 alternateRoomEvents: [{
                     type: 'examine',
                     choice: 'Search the coat.',
                     msg: 'You search the pockets of the coat, but there isn\'t anything there.',
-                    keywords: ['coat'],
                     param: ''
                 }, {
                     type: 'exit',
                     choice: 'Return to the basement hallway.',
                     msg: 'You return to the basement hallway.',
-                    keywords: ['leave', 'back', 'hall', 'hallway'],
                     param: 'Basement'
                 }],
             },
             'StairTop': {
                 description: 'At the top of the stairs, you encounter a locked door.',
                 alternateDescription: 'You are at the top of the stairs. A key is stuck in the open door before you.',
-                hint: 'If only you had a key...',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back down the stairs.',
                     msg: 'You go back down the stairs.',
-                    keywords: ['leave', 'back', 'stairs', 'down'],
                     param: 'Entry'
+                }, {
+                    type: 'nullEvent',
+                    choice: 'Knock on the door.',
+                    msg: 'You knock on the door, but no one answers.',
+                    param: ''
                 }, {
                     type: 'key',
                     hidden: true,
                     choice: 'Use the key.',
-                    keywords: ['leave', 'back', 'stairs', 'down'],
                     param: 'Hallway'
                 }],
                 alternateRoomEvents: [{
                     type: 'exit',
                     choice: 'Go back down the stairs.',
                     msg: 'You go back down the stairs.',
-                    keywords: ['leave', 'back', 'stairs', 'down'],
                     param: 'Entry'
                 }, {
                     type: 'enter',
                     choice: 'Enter the open door.',
                     message: 'You enter the door.',
-                    keywords: ['leave', 'back', 'stairs', 'down'],
                     param: 'Hallway'
                 }]
             },
             'Hallway': {
-                description: 'You enter a room on the top floor of the house and see a door on the left and one the right.',
+                description: 'You enter a room on the top floor of the house. There are three doors in a row.',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the stairs.',
                     msg: 'You go back to the stairs.',
-                    keywords: ['leave', 'back', 'down', 'stairs'],
                     param: 'StairTop'
                 }, {
                     type: 'enter',
                     choice: 'Open the door on the left.',
                     msg: 'You open the door on the left.',
-                    keywords: ['left'],
                     param: 'Left'
+                }, {
+                    type: 'enter',
+                    choice: 'Open the door in the middle.',
+                    msg: 'You open the door in the middle.',
+                    param: 'Middle'
                 }, {
                     type: 'enter',
                     choice: 'Open the door on the right.',
                     msg: 'You open the door on the right.',
-                    keywords: ['right'],
                     param: 'Right'
                 }]
             },
             'Right': {
                 description: 'Before you is a small armory. A sword leans in the corner, and on the wall hangs a shield.',
                 alternateDescription: 'Before you is a small armory. There is a shield on the wall.',
-                hint: 'Perhaps you should take something. It might be dangerous up ahead...',
                 roomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the hallway.',
                     msg: 'You return to the hallway.',
-                    keywords: ['leave', 'back', 'hallway', 'hall'],
                     param: 'Hallway'
                 }, {
                     type: 'take',
                     choice: 'Pick up the sword.',
                     msg: 'You pick up the sword.',
-                    keywords: ['sword'],
                     param: 'sword'
                 }, {
                     type: 'nullEvent',
                     choice: 'Pick up the shield.',
                     msg: 'The shield is fastened to the wall and will not come loose.',
-                    keywords: ['shield'],
                     param: ''
                 }],
                 alternateRoomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the hallway.',
                     msg: 'You return to the hallway.',
-                    keywords: ['leave', 'back', 'hallway', 'hall'],
                     param: 'Hallway'
                 }, {
-                    type: 'take',
+                    type: 'nullEvent',
                     choice: 'Pick up the shield.',
                     msg: 'The shield is fastened to the wall and will not come loose.',
-                    keywords: ['shield'],
                     param: ''
                 }]
             },
-            'Left': {
+            'Middle': {
                 description: 'You enter a round room.  There are only three things in this room.  The door you came through, a door on the other side of the room, and a two headed dog in the middle.',
                 alternateDescription: 'A two-headed dog sleeps contentedly on the floor with a turkey bone under its paw. There is a door on the other side of the room. The exit is behind you.',
-                hint: 'The dog looks hungry...and you look tasty.',
                 roomEvents: [{
                     type: 'run',
                     choice: 'Run away!',
                     msg: 'You flee in terror.',
-                    keywords: ['flee'],
                     param: 'Hallway'
                 }, {
                     type: 'attack',
                     hidden: true,
                     choice: 'Attack!',
                     msg: 'Did I mention it had two heads? You manage to injure the left head as the right head lunges at you...',
-                    keywords: ['sword'],
                     param: 'death'
                 }, {
                     type: 'turkey',
                     hidden: true,
                     choice: 'Feed the dog a piece of turkey.',
                     msg: 'You rip off a piece of the turkey and throw it on the ground.  The dog is distracted for now! You sneak past.',
-                    keywords: ['snack'],
                     param: 'Chestroom'
                 }, {
                     type: 'sword',
                     hidden: true,
                     choice: 'Feed the dog a piece of turkey.',
                     msg: 'Did I mention it had two heads? You manage to injure the left head as the right head lunges at you...',
-                    keywords: ['snack'],
                     param: 'death'
                 }],
                 alternateRoomEvents: [{
                     type: 'exit',
                     choice: 'Go back to the hallway.',
                     msg: 'You exit to the hallway.',
-                    keywords: ['back', 'leave'],
                     param: 'Hallway'
                 }, {
                     type: 'enter',
                     choice: 'Go through the door.',
                     msg: 'You pass through the door.',
-                    keywords: ['door'],
                     param: 'Chestroom'
                 }]
             },
+            'Left': {
+                description: 'You hesitate in the doorway before the pitch black room.',
+                roomEvents: [{
+                    type: 'exit',
+                    choice: 'Exit to the hallway.',
+                    msg: 'The room makes you think twice. You return to the hallway.',
+                    param: 'Hallway'
+                }, {
+                    type: 'attack',
+                    choice: 'Enter cautiously.',
+                    msg: 'You notice the faint rustling sound too late. You are stricken down by a viper.',
+                    param: 'death'
+                }]
+            },
+
             'Chestroom': {
                 description: 'A shaft of light pierces the ceiling, shining down upon a jewel-encrusted chest. There seems to be an inscription on the lid in an ancient language.',
-                hint: 'The language seems familiar somehow--if you squint, you might be able to read it.',
                 roomEvents: [{
                     type: 'read',
                     choice: 'Read the inscription.',
                     msg: 'You slowly sound out the strange and lilting syllables. The dust swirls around you and the chest begins to creak.',
-                    keywords: ['inscription', 'examine', 'squint'],
                     param: 'End'
                 }, {
                     type: 'nullEvent',
                     choice: 'Try to force the chest open.',
                     msg: 'You kick and pound on the chest, sending dust flying up in a cloud. When the dust finally settles, the inscription gleams in the sun.',
-                    keywords: ['kick', 'pound'],
                     param: ''
                 }, {
                     type: 'exit',
                     choice: 'Return to face the dog.',
                     msg: 'You return to face the dog.',
-                    keywords: ['back', 'leave'],
-                    param: 'Left'
+                    param: 'Middle'
                 }]
             },
             'End': {
