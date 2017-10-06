@@ -1,3 +1,5 @@
+/* @preserve (c) Tableau 2017. Checking out the source code?  We respect that.  It's not required, but we definitely won't punish you for solving the puzzle in unique ways!
+ */
 var TC = {
 
     init: function() {

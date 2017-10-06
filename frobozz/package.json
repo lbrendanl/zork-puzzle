@@ -5,7 +5,7 @@
   "main": "frobozz.js",
   "scripts": {
     "test": "mocha",
-    "minify": "uglifyjs frobozz.js -o frobozz.min.js"
+    "minify": "uglifyjs frobozz.js --comments --compress -o frobozz.min.js"
   },
   "author": "Jared Dominguez",
   "license": "MIT",
