@@ -147,6 +147,7 @@ var TC = {
 
         displayChoices: function(room) {
             if (room.roomEvents.length > 0) {
+                TC.terminal.write();                
                 TC.terminal.write(TC.gameconfig.messages.makeChoice);
                 TC.terminal.write();
                 TC.terminal.write('0) View inventory');
@@ -171,6 +172,8 @@ var TC = {
                 }
                 TC.terminal.write(TC.gameconfig.messages.inventoryContents);
                 TC.terminal.write(inv.join(', '));
+                TC.terminal.write();
+                TC.terminal.write(TC.gameconfig.messages.inventoryInstructions);
             }
         },
         'look': {
@@ -327,8 +330,8 @@ var TC = {
             }
         },
 
-        'read': {
-            type: 'read',
+        'kick': {
+            type: 'kick',
             action: function(param) {
                 TC.events.enter.action(param);
                 TC.terminal.hideInput();
@@ -400,6 +403,7 @@ var TC = {
             gameOver: '--- GAME OVER ---<br><br>Refresh this page to try again.',
             inputNotUnderstood: 'Come again?',
             inventoryContents: 'You have the following items in your inventory:',
+            inventoryInstructions: 'Type the name of an item to use it.',
             itemAddedToInventory: 'Item added to inventory.',
             makeChoice: 'What would you like to do?',
             nothingToTake: 'There is nothing to take.',
@@ -411,7 +415,7 @@ var TC = {
         possibleInventory: ['turkey', 'key', 'sword'],
         rooms: {
             'Intro': {
-                description: 'Welcome!  The next puzzle is a short interactive text adventure game. <br><br>',
+                description: 'Welcome!  The next puzzle is a short interactive text adventure game.',
                 roomEvents: [{
                     type: 'enter',
                     choice: 'Enter the game. (Type 1 to select this command.)',
@@ -672,15 +676,15 @@ var TC = {
             'Chestroom': {
                 description: 'A shaft of light pierces the ceiling, shining down upon a jewel-encrusted chest. There seems to be an inscription on the lid in an ancient language.',
                 roomEvents: [{
-                    type: 'read',
+                    type: 'kick',
                     choice: 'Read the inscription.',
-                    msg: 'You slowly sound out the strange and lilting syllables. The dust swirls around you and the chest begins to creak.',
+                    msg: 'NERD.  You slowly sound out the strange and lilting syllables. The dust swirls around you and the chest begins to creak.',
                     param: 'End'
                 }, {
-                    type: 'nullEvent',
-                    choice: 'Try to force the chest open.',
-                    msg: 'You kick and pound on the chest, sending dust flying up in a cloud. When the dust finally settles, the inscription gleams in the sun.',
-                    param: ''
+                    type: 'kick',
+                    choice: 'Kick the chest.',
+                    msg: 'You kick the chest, sending dust flying up in a cloud. When the dust finally settles, the chest appears to now be open...',
+                    param: 'End'
                 }, {
                     type: 'exit',
                     choice: 'Return to face the dog.',
@@ -689,7 +693,7 @@ var TC = {
                 }]
             },
             'End': {
-                description: 'The chest opens.  Inside, all you find is a small piece of parchment.  You unfold the parchment.  It reads SUPER_COOL_CODEWORD.  Enter it into ClueKeeper to defuse the bomb and move on in your hunt.'
+                description: 'The chest opens.  Inside, all you find is a small piece of parchment.  You unfold the parchment.  It reads THROWBACK.  Enter it into ClueKeeper to defuse the bomb and move on in your hunt.'
             }
         }
     }
